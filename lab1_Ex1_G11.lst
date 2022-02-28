@@ -1,0 +1,1592 @@
+MPASM  5.51                  LAB1_EX1_G11.ASM   2-27-2022  5:42:02         PAGE  1
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00001 ;SHAI COHEN    061985453
+                      00002 ;this program write on the LCD our names
+                      00003 ;the program desplay "BARAK AVREKI" and move it to the right.
+                      00004 ;in the end of the line the last char move to the first cell in the second line
+Warning[205]: Found directive in column 1. (LIST)
+                      00005 LIST    P=PIC16F877
+Warning[205]: Found directive in column 1. (include)
+                      00006 include         <P16f877.inc>
+                      00001         LIST
+                      00002 
+                      00003 ;==========================================================================
+                      00004 ;  MPASM PIC16F877 processor include
+                      00005 ; 
+                      00006 ;  (c) Copyright 1999-2013 Microchip Technology, All rights reserved
+                      00007 ;==========================================================================
+                      00008 
+                      00540         LIST
+Warning[205]: Found directive in column 1. (org)
+0000                  00007 org             0x00
+                      00008 
+                      00009 
+                      00010 
+0000                  00011 reset:
+0000   0000           00012         nop
+                      00013 
+0001   2810           00014         goto start
+                      00015 
+0010                  00016         org             0x10
+                      00017 
+0010                  00018 start:  
+                      00019 
+                      00020 
+0010   1283           00021         bcf                     STATUS, RP0
+0011   1303           00022         bcf                     STATUS, RP1     ;bank 0
+0012   0188           00023         clrf            PORTD           ;clear old data from PORTD
+0013   0189           00024         clrf            PORTE           ;clear old data from PORTE
+                      00025 
+0014   1683           00026         bsf                     STATUS, RP0     ;bank 1
+0015   3006           00027         movlw           0x06            ;set data as digital
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0016   009F           00028         movwf           ADCON1
+0017   138B           00029         bcf                     INTCON,GIE                      ;No interrupt
+0018   300F           00030         movlw           0x0F
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0019   0086           00031         movwf           TRISB
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+001A   1381           00032         bcf                     OPTION_REG,0x7          ;Enable PortB Pull-Up
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+001B   0189           00033         clrf            TRISE
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+001C   0188           00034         clrf            TRISD
+001D   1283           00035         bcf                     STATUS,RP0                      ;Bank0  
+001E   2267           00036         call            init    ;initialized the LCD
+MPASM  5.51                  LAB1_EX1_G11.ASM   2-27-2022  5:42:02         PAGE  2
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00037 
+                      00038 
+001F   3008           00039         movlw           0x08
+0020   00DF           00040         movwf           0x5f            ;count 7 times for print result
+0021   01C4           00041         clrf            0x44            ; capture the numbera
+0022   3005           00042         movlw           0x05            ; for the counter num A
+0023   00C0           00043         movwf           0x40
+0024   3001           00044         movlw           0x01            ; for the counter num B
+0025   00D0           00045         movwf           0x50
+0026   3001           00046         movlw           0x01            ; for the counter print B
+0027   00C2           00047         movwf           0x42    
+0028   3001           00048         movlw           0x01            ; for the counter print B
+0029   00C3           00049         movwf           0x43    
+002A   3080           00050         movlw           0x80             ;PLACE for the data on the LCD
+002B   00E1           00051         movwf           0x61
+                      00052         
+                      00053                         
+002C   3005           00054         movlw           0x05
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+002D   0088           00055         movwf           0x88            ;print B
+002E   2888           00056         goto            disp_a          ;print A
+002F                  00057 wkb:
+                      00058         
+                      00059 
+002F   1206           00060                 bcf                     PORTB,0x4                       ;scan Row 1
+0030   1686           00061                 bsf                     PORTB,0x5
+0031   1706           00062                 bsf                     PORTB,0x6
+0032   1786           00063                 bsf                     PORTB,0x7
+0033   1C06           00064                 btfss           PORTB,0x0
+0034   285C           00065                 goto            kb01
+0035   1C86           00066                 btfss           PORTB,0x1
+0036   285E           00067                 goto            kb02
+0037   1D06           00068                 btfss           PORTB,0x2
+0038   2860           00069                 goto            kb03
+0039   1D86           00070                 btfss           PORTB,0x3
+003A   286E           00071                 goto            kb0a
+                      00072 
+003B   1606           00073                 bsf                     PORTB,0x4
+003C   1286           00074                 bcf                     PORTB,0x5                       ;scan Row 2
+003D   1C06           00075                 btfss           PORTB,0x0
+003E   2862           00076                 goto            kb04
+003F   1C86           00077                 btfss           PORTB,0x1
+0040   2864           00078                 goto            kb05
+0041   1D06           00079                 btfss           PORTB,0x2
+0042   2866           00080                 goto            kb06
+0043   1D86           00081                 btfss           PORTB,0x3
+0044   2870           00082                 goto            kb0b
+                      00083 
+0045   1686           00084                 bsf                     PORTB,0x5
+0046   1306           00085                 bcf                     PORTB,0x6                       ;scan Row 3
+0047   1C06           00086                 btfss           PORTB,0x0
+0048   2868           00087                 goto            kb07
+0049   1C86           00088                 btfss           PORTB,0x1
+MPASM  5.51                  LAB1_EX1_G11.ASM   2-27-2022  5:42:02         PAGE  3
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+004A   286A           00089                 goto            kb08
+004B   1D06           00090                 btfss           PORTB,0x2
+004C   286C           00091                 goto            kb09
+004D   1D86           00092                 btfss           PORTB,0x3
+004E   2872           00093                 goto            kb0c
+                      00094 
+004F   1706           00095                 bsf                     PORTB,0x6
+0050   1386           00096                 bcf                     PORTB,0x7                       ;scan Row 4
+0051   1C06           00097                 btfss           PORTB,0x0
+0052   2876           00098                 goto            kb0e
+0053   1C86           00099                 btfss           PORTB,0x1
+0054   285A           00100                 goto            kb00
+0055   1D06           00101                 btfss           PORTB,0x2
+0056   2878           00102                 goto            kb0f
+0057   1D86           00103                 btfss           PORTB,0x3
+0058   2874           00104                 goto            kb0d
+                      00105 
+0059   282F           00106                 goto            wkb
+                      00107 
+005A   3000           00108 kb00:   movlw           0x00
+005B   287A           00109                 goto            disp_0
+005C   3001           00110 kb01:   movlw           0x01
+005D   2881           00111                 goto            disp_1
+005E   3002           00112 kb02:   movlw           0x02
+005F   287A           00113                 goto            disp_0
+0060   3003           00114 kb03:   movlw           0x03
+0061   28B2           00115                 goto            disp_error
+0062   3004           00116 kb04:   movlw           0x04
+0063   28B2           00117                 goto            disp_error
+0064   3005           00118 kb05:   movlw           0x05
+0065   28B2           00119                 goto            disp_error
+0066   3006           00120 kb06:   movlw           0x06
+0067   28B2           00121                 goto            disp_error
+0068   3007           00122 kb07:   movlw           0x07
+0069   28B2           00123                 goto            disp_error
+006A   3008           00124 kb08:   movlw           0x08
+006B   28B2           00125                 goto            disp_error
+006C   3009           00126 kb09:   movlw           0x09
+006D   28B2           00127                 goto            disp_error
+006E   300A           00128 kb0a:   movlw           0x0A
+006F   28B2           00129                 goto            disp_error
+0070   300B           00130 kb0b:   movlw           0x0B
+0071   28B2           00131                 goto            disp_error
+0072   300C           00132 kb0c:   movlw           0x0C
+0073   28B2           00133                 goto            disp_error
+0074   300D           00134 kb0d:   movlw           0x0D
+0075   28B2           00135                 goto            disp_error
+0076   300E           00136 kb0e:   movlw           0x0E
+0077   28B2           00137                 goto            disp_error
+0078   300F           00138 kb0f:   movlw           0x0F
+0079   28B2           00139                 goto            disp_error
+                      00140 
+                      00141 ;**********************************************************
+MPASM  5.51                  LAB1_EX1_G11.ASM   2-27-2022  5:42:02         PAGE  4
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+007A                  00142 disp_0:
+                      00143         
+007A   3030           00144                 movlw   0x30                    ; CHAR (the data )
+007B   00A0           00145                 movwf   0x20
+007C   2297           00146                 call    lcdd
+007D   22B9           00147                 call    mdel
+007E   1044           00148                 BCF             0x44,0
+007F   0DC4           00149                 RLF             0x44, 1
+0080   28A4           00150                 goto    counter
+                      00151 ;**********************************************************
+0081                  00152 disp_1:
+                      00153         
+0081   3031           00154                 movlw   0x31                    ; CHAR (the data )
+0082   00A0           00155                 movwf   0x20
+0083   2297           00156                 call    lcdd
+0084   22B9           00157                 call    mdel
+0085   1444           00158                 BSF             0x44,0
+0086   0DC4           00159                 RLF             0x44, 1 
+0087   28A4           00160                 goto    counter
+                      00161 
+                      00162                         
+                      00163 ;**********************************************************
+0088                  00164 disp_a:
+0088   3041           00165                 movlw   0x41                    ; CHAR (the data )
+0089   00A0           00166                 movwf   0x20
+008A   2297           00167                 call    lcdd
+008B   22B9           00168                 call    mdel
+008C   28A4           00169                 goto    counter
+                      00170 ;**********************************************************
+008D                  00171 disp_b:
+008D   0BC2           00172                 decfsz  0x42,1
+008E   2897           00173                 goto    disp_c
+008F   3042           00174                 movlw   0x42                    ; CHAR (the data )
+0090   00A0           00175                 movwf   0x20
+0091   2297           00176                 call    lcdd
+0092   22B9           00177                 call    mdel
+0093   3005           00178                 movlw   0x05            ; for the counter 4 num 
+0094   00C0           00179                 movwf   0x40
+0095   20DC           00180                 call    num_A
+0096   28A4           00181                 goto    counter
+                      00182                 
+                      00183                 
+                      00184 ;**********************************************************
+0097                  00185 disp_c:
+                      00186                 
+0097   0BC3           00187                 decfsz  0x43,1
+0098   28FE           00188                 goto    result
+0099   30BF           00189                 movlw   0xbf            
+009A   00E1           00190                 movwf   0x61
+009B   20AC           00191                 call    rotate_down
+009C   3043           00192                 movlw   0x43                    ; CHAR (the data )
+009D   00A0           00193                 movwf   0x20
+009E   2297           00194                 call    lcdd
+MPASM  5.51                  LAB1_EX1_G11.ASM   2-27-2022  5:42:02         PAGE  5
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+009F   22B9           00195                 call    mdel
+00A0   3005           00196                 movlw   0x05            ; for the counter 4 num
+00A1   00C0           00197                 movwf   0x40
+00A2   20E2           00198                 call    num_B
+00A3   28A4           00199                 goto    counter
+                      00200                 
+                      00201 
+00A4                  00202 counter:
+                      00203 
+00A4                  00204 rotate_right:
+00A4   0AE1           00205                 incf    0x61,1
+00A5   0861           00206                 movf    0x61,w
+00A6   00A0           00207                 movwf   0x20
+00A7   2285           00208                 call    lcdc
+00A8   22B9           00209                 call    mdel
+                      00210 
+00A9   0BC0           00211                 decfsz  0x40,1
+00AA   282F           00212                 goto    wkb
+00AB   288D           00213                 goto    disp_b
+                      00214 
+00AC                  00215 rotate_down:
+00AC   0AE1           00216                 incf    0x61,1
+00AD   0861           00217                 movf    0x61,w
+00AE   00A0           00218                 movwf   0x20
+00AF   2285           00219                 call    lcdc
+00B0   22B9           00220                 call    mdel
+00B1   0008           00221                 return
+                      00222         
+                      00223 
+00B2                  00224 disp_error:
+                      00225         ;******************************E***************************
+00B2   30C5           00226         movlw   0xc5                     ;PLACE for the data on the LCD
+00B3   00A0           00227         movwf   0x20
+00B4   2285           00228         call    lcdc
+00B5   22B9           00229         call    mdel
+                      00230 
+00B6   3045           00231         movlw   0x45                    ; CHAR (the data )
+00B7   00A0           00232         movwf   0x20
+00B8   2297           00233         call    lcdd
+00B9   22B9           00234         call    mdel
+                      00235 ;******************************R***************************     
+00BA   30C6           00236         movlw   0xc6                     ;PLACE for the data on the LCD
+00BB   00A0           00237         movwf   0x20
+00BC   2285           00238         call    lcdc
+00BD   22B9           00239         call    mdel
+                      00240 
+00BE   3052           00241         movlw   0x52                    ; CHAR (the data )
+00BF   00A0           00242         movwf   0x20
+00C0   2297           00243         call    lcdd
+00C1   22B9           00244         call    mdel
+                      00245 ;******************************R***************************     
+00C2   30C7           00246         movlw   0xc7                     ;PLACE for the data on the LCD
+00C3   00A0           00247         movwf   0x20
+MPASM  5.51                  LAB1_EX1_G11.ASM   2-27-2022  5:42:02         PAGE  6
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+00C4   2285           00248         call    lcdc
+00C5   22B9           00249         call    mdel
+                      00250 
+00C6   3052           00251         movlw   0x52                    ; CHAR (the data )
+00C7   00A0           00252         movwf   0x20
+00C8   2297           00253         call    lcdd
+00C9   22B9           00254         call    mdel
+                      00255 ;******************************O***************************
+00CA   30C8           00256         movlw   0xc8                     ;PLACE for the data on the LCD
+00CB   00A0           00257         movwf   0x20
+00CC   2285           00258         call    lcdc
+00CD   22B9           00259         call    mdel
+                      00260 
+00CE   304F           00261         movlw   0x4F                    ; CHAR (the data )
+00CF   00A0           00262         movwf   0x20
+00D0   2297           00263         call    lcdd
+00D1   22B9           00264         call    mdel
+                      00265 ;******************************R***************************     
+00D2   30C9           00266         movlw   0xc9                     ;PLACE for the data on the LCD
+00D3   00A0           00267         movwf   0x20
+00D4   2285           00268         call    lcdc
+00D5   22B9           00269         call    mdel
+                      00270 
+00D6   3052           00271         movlw   0x52                    ; CHAR (the data )
+00D7   00A0           00272         movwf   0x20
+00D8   2297           00273         call    lcdd
+00D9   22B9           00274         call    mdel
+                      00275 
+                      00276 
+00DA   22D3           00277         call    delay_2
+00DB   2810           00278         goto    start   
+                      00279 
+00DC                  00280 num_A:
+00DC   01C5           00281         clrf    0x45    ;num a
+00DD   0CC4           00282         RRF             0x44, 1
+00DE   0844           00283         movf    0x44,w
+00DF   00C5           00284         movwf   0x45    ;num a  
+00E0   01C4           00285         clrf    0x44
+00E1   0008           00286         return
+                      00287 
+00E2                  00288 num_B:
+00E2   01C6           00289         clrf    0x46    ;num b
+00E3   0CC4           00290         RRF             0x44,1
+00E4   13C4           00291         BCF             0x44,7
+00E5   0844           00292         movf    0x44,w
+00E6   00C6           00293         movwf   0x46    ;num b  
+00E7   01C4           00294         clrf    0x44
+00E8   0008           00295         return
+                      00296 
+00E9                  00297 num_C:
+00E9   01C7           00298         clrf    0x47    ;num b
+00EA   0CC4           00299         RRF             0x44,1
+00EB   13C4           00300         BCF             0x44,7
+MPASM  5.51                  LAB1_EX1_G11.ASM   2-27-2022  5:42:02         PAGE  7
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+00EC   0844           00301         movf    0x44,w
+00ED   00C7           00302         movwf   0x47    ;num b  
+00EE   01C4           00303         clrf    0x44
+00EF   0008           00304         return
+                      00305 
+00F0                  00306 B_D_F:
+00F0   1D47           00307         BTFSS   0x47,2
+00F1   2106           00308         call    a_power_b       ;1000   
+00F2   1DC7           00309         BTFSS   0x47,3
+00F3   2144           00310         call    a_double_b      ;0100
+00F4   2210           00311         call    zeros_in_b      ;1100
+00F5   0008           00312         return
+                      00313 
+00F6                  00314 A_C_E_G:
+00F6   1947           00315         BTFSC   0x47,2  
+00F7   2104           00316         call    a_parts_b
+00F8   1DC7           00317         BTFSS   0x47,3
+00F9   216B           00318         call    a_minus_b
+00FA   1C47           00319         BTFSS   0x47,0
+00FB   29D7           00320         goto    ones_in_a
+00FC   2990           00321         goto    ones_pairs_in_b
+00FD   0008           00322         return
+00FE                  00323 result:
+00FE   2267           00324         call    init    ;initialized the LCD
+00FF   20E9           00325         call    num_C
+0100   1CC7           00326         BTFSS   0x47,1  
+0101   20F0           00327         call    B_D_F   
+0102   20F6           00328         call    A_C_E_G         
+0103   2AE0           00329         goto    end_code
+                      00330 
+                      00331 
+0104                  00332 a_parts_b:
+0104   2AE0           00333         goto end_code
+0105   0008           00334         return
+                      00335 
+0106                  00336 a_power_b
+0106   3085           00337         movlw   0x85    ;place on lcd
+0107   00E1           00338         movwf   0x61
+0108   20AC           00339         call    rotate_down
+                      00340 ;******************************A***************************
+0109   3041           00341         movlw   0x41                    ; CHAR (the data )
+010A   00A0           00342         movwf   0x20
+010B   2297           00343         call    lcdd
+010C   22B9           00344         call    mdel
+010D   20AC           00345         call    rotate_down
+                      00346 ;******************************^*"***************************
+010E   305E           00347         movlw   0x5e                    ; CHAR (the data )
+010F   00A0           00348         movwf   0x20
+0110   2297           00349         call    lcdd
+0111   22B9           00350         call    mdel
+0112   20AC           00351         call    rotate_down
+                      00352 ;******************************B***************************
+0113   3042           00353         movlw   0x42                    ; CHAR (the data )
+MPASM  5.51                  LAB1_EX1_G11.ASM   2-27-2022  5:42:02         PAGE  8
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0114   00A0           00354         movwf   0x20
+0115   2297           00355         call    lcdd
+0116   22B9           00356         call    mdel
+0117   20AC           00357         call    rotate_down
+                      00358 ;******************************=***************************
+0118   303D           00359         movlw   0x3d                    ; CHAR (the data )
+0119   00A0           00360         movwf   0x20
+011A   2297           00361         call    lcdd
+011B   22B9           00362         call    mdel
+011C   20AC           00363         call    rotate_down
+                      00364         
+011D   0845           00365         movf    0x45,w
+011E   00C8           00366         movwf   0x48
+011F   00E0           00367         movwf   0x60
+0120   0846           00368         movf    0x46,w
+0121   00C9           00369         movwf   0x49
+0122   03C9           00370         decf    0x49,1
+0123   3001           00371         movlw   0x01
+0124   00CA           00372         movwf   0x4a
+0125   01CB           00373         clrf    0x4b
+0126                  00374 Conversions:
+0126   0B4A           00375         decfsz  0x4a,0
+0127   0ACB           00376         incf    0x4b,1
+0128   0848           00377         movf    0x48,w
+0129   00C6           00378         movwf   0x46
+012A   0860           00379         movf    0x60,w
+012B   00C5           00380         movwf   0x45
+012C   3007           00381         movlw   0x07
+012D   00A1           00382         movwf   0x21
+012E   01E0           00383         clrf    0x60
+012F   3002           00384         movlw   0x02
+0130   00CA           00385         movwf   0x4a
+0131   0103           00386         clrw
+0132   2163           00387         call    multiplication
+0133   0BC9           00388         decfsz  0x49,1
+0134   2926           00389         goto    Conversions
+0135   30C3           00390         movlw   0xc3    ;place on lcd
+0136   00E1           00391         movwf   0x61
+0137   1C4B           00392         btfss   0x4b,0
+0138   293A           00393         goto    special
+0139   2A50           00394         goto    print
+                      00395 
+013A                  00396 special:
+013A   0AC9           00397         incf    0x49,1
+013B   1C49           00398         btfss   0x49,0
+013C   293E           00399         goto    Zero_situation
+013D   2941           00400         goto    One_situation
+013E                  00401 Zero_situation:
+013E   3001           00402         movlw   0x01
+013F   00E0           00403         movwf   0x60
+0140   2A50           00404         goto    print
+0141                  00405 One_situation:  
+0141   0848           00406         movf    0x48,w
+MPASM  5.51                  LAB1_EX1_G11.ASM   2-27-2022  5:42:02         PAGE  9
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0142   00E0           00407         movwf   0x60
+0143   2A50           00408         goto    print
+                      00409 
+                      00410 
+                      00411 
+0144                  00412 a_double_b:
+                      00413 
+0144   3085           00414         movlw   0x85    ;place on lcd
+0145   00E1           00415         movwf   0x61
+0146   20AC           00416         call    rotate_down
+                      00417 ;******************************A***************************
+0147   3041           00418         movlw   0x41                    ; CHAR (the data )
+0148   00A0           00419         movwf   0x20
+0149   2297           00420         call    lcdd
+014A   22B9           00421         call    mdel
+014B   20AC           00422         call    rotate_down
+                      00423 ;****************************** "*" ***************************
+014C   302A           00424         movlw   0x2a                    ; CHAR (the data )
+014D   00A0           00425         movwf   0x20
+014E   2297           00426         call    lcdd
+014F   22B9           00427         call    mdel
+0150   20AC           00428         call    rotate_down
+                      00429 ;******************************B***************************
+0151   3042           00430         movlw   0x42                    ; CHAR (the data )
+0152   00A0           00431         movwf   0x20
+0153   2297           00432         call    lcdd
+0154   22B9           00433         call    mdel
+0155   20AC           00434         call    rotate_down
+                      00435 ;******************************=***************************
+0156   303D           00436         movlw   0x3d                    ; CHAR (the data )
+0157   00A0           00437         movwf   0x20
+0158   2297           00438         call    lcdd
+0159   22B9           00439         call    mdel
+015A   20AC           00440         call    rotate_down
+                      00441 
+015B   3007           00442         movlw   0x07
+015C   00A1           00443         movwf   0x21
+015D   01E0           00444         clrf    0x60
+015E   0103           00445         clrw
+015F   2163           00446         call    multiplication
+0160   30C3           00447         movlw   0xc3    ;place on lcd
+0161   00E1           00448         movwf   0x61
+0162   2A50           00449         goto    print
+                      00450 
+0163                  00451 multiplication:
+0163   1846           00452         btfsc   0x46,0
+Warning[202]: Argument out of range.  Least significant bits used.
+0164   0745           00453         addwf   0x45,0x60
+0165   00E0           00454         movwf   0x60
+0166   0DC5           00455         rlf             0x45,1
+0167   0CC6           00456         rrf             0x46,1
+0168   0BA1           00457         decfsz  0x21,1
+0169   2963           00458         goto    multiplication
+MPASM  5.51                  LAB1_EX1_G11.ASM   2-27-2022  5:42:02         PAGE 10
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+016A   0008           00459         return
+                      00460         
+016B                  00461 a_minus_b:
+                      00462 
+016B   3085           00463         movlw   0x85    ;place on lcd
+016C   00E1           00464         movwf   0x61
+016D   20AC           00465         call    rotate_down
+                      00466 ;******************************A***************************
+016E   3041           00467         movlw   0x41                    ; CHAR (the data )
+016F   00A0           00468         movwf   0x20
+0170   2297           00469         call    lcdd
+0171   22B9           00470         call    mdel
+0172   20AC           00471         call    rotate_down
+                      00472 ;******************************-***************************
+0173   302D           00473         movlw   0x2d                    ; CHAR (the data )
+0174   00A0           00474         movwf   0x20
+0175   2297           00475         call    lcdd
+0176   22B9           00476         call    mdel
+0177   20AC           00477         call    rotate_down
+                      00478 ;******************************B***************************
+0178   3042           00479         movlw   0x42                    ; CHAR (the data )
+0179   00A0           00480         movwf   0x20
+017A   2297           00481         call    lcdd
+017B   22B9           00482         call    mdel
+017C   20AC           00483         call    rotate_down
+                      00484 ;******************************=***************************
+017D   303D           00485         movlw   0x3d                    ; CHAR (the data )
+017E   00A0           00486         movwf   0x20
+017F   2297           00487         call    lcdd
+0180   22B9           00488         call    mdel
+0181   20AC           00489         call    rotate_down
+                      00490 
+                      00491 
+0182   3000           00492         movlw   0X00
+0183   00E0           00493         movwf   0X60
+0184   0846           00494     movf        0x46,w  
+0185   0245           00495         subwf   0X45,0
+0186   00E0           00496         movwf   0X60
+0187   30C3           00497         movlw   0xc3    ;place on lcd
+0188   00E1           00498         movwf   0x61
+0189   1FE0           00499         btfss   0x60,07
+018A   2A50           00500         goto    print
+018B   0845           00501         movf    0x45,w  
+018C   0246           00502         subwf   0X46,0
+018D   00E0           00503         movwf   0X60
+018E   17E0           00504         bsf             0x60,07
+018F   2A50           00505         goto    print
+                      00506         
+0190                  00507 ones_pairs_in_b:
+                      00508 
+0190   3082           00509         movlw   0x82            
+0191   00E1           00510         movwf   0x61
+0192   20AC           00511         call    rotate_down
+MPASM  5.51                  LAB1_EX1_G11.ASM   2-27-2022  5:42:02         PAGE 11
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00512 ;******************************P***************************
+0193   3050           00513         movlw   0x50                    ; CHAR (the data )
+0194   00A0           00514         movwf   0x20
+0195   2297           00515         call    lcdd
+0196   22B9           00516         call    mdel
+0197   20AC           00517         call    rotate_down
+                      00518 ;******************************A***************************
+0198   3041           00519         movlw   0x41                    ; CHAR (the data )
+0199   00A0           00520         movwf   0x20
+019A   2297           00521         call    lcdd
+019B   22B9           00522         call    mdel
+019C   20AC           00523         call    rotate_down
+                      00524 ;******************************I***************************
+019D   3049           00525         movlw   0x49                    ; CHAR (the data )
+019E   00A0           00526         movwf   0x20
+019F   2297           00527         call    lcdd
+01A0   22B9           00528         call    mdel
+01A1   20AC           00529         call    rotate_down
+                      00530 ;******************************R***************************
+01A2   30C9           00531         movlw   0xc9                    ; CHAR (the data )
+01A3   00A0           00532         movwf   0x20
+01A4   2297           00533         call    lcdd
+01A5   22B9           00534         call    mdel
+01A6   20AC           00535         call    rotate_down
+                      00536 ;******************************S***************************
+01A7   3053           00537         movlw   0x53                    ; CHAR (the data )
+01A8   00A0           00538         movwf   0x20
+01A9   2297           00539         call    lcdd
+01AA   22B9           00540         call    mdel
+01AB   20AC           00541         call    rotate_down
+                      00542 ;******************************space***************************
+01AC   20AC           00543         call    rotate_down
+                      00544 ;******************************I***************************
+01AD   3049           00545         movlw   0x49                    ; CHAR (the data )
+01AE   00A0           00546         movwf   0x20
+01AF   2297           00547         call    lcdd
+01B0   22B9           00548         call    mdel
+01B1   20AC           00549         call    rotate_down
+                      00550 ;******************************N***************************
+01B2   304E           00551         movlw   0x4e                    ; CHAR (the data )
+01B3   00A0           00552         movwf   0x20
+01B4   2297           00553         call    lcdd
+01B5   22B9           00554         call    mdel
+01B6   20AC           00555         call    rotate_down
+                      00556 ;******************************space***************************
+01B7   20AC           00557         call    rotate_down
+                      00558 ;******************************A***************************
+01B8   3042           00559         movlw   0x42                    ; CHAR (the data )
+01B9   00A0           00560         movwf   0x20
+01BA   2297           00561         call    lcdd
+01BB   22B9           00562         call    mdel
+01BC   20AC           00563         call    rotate_down
+                      00564 ;******************************:***************************
+MPASM  5.51                  LAB1_EX1_G11.ASM   2-27-2022  5:42:02         PAGE 12
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+01BD   303A           00565         movlw   0x3a                    ; CHAR (the data )
+01BE   00A0           00566         movwf   0x20
+01BF   2297           00567         call    lcdd
+01C0   22B9           00568         call    mdel    
+01C1   20AC           00569         call    rotate_down
+                      00570 
+01C2   3005           00571         movlw   0x05
+01C3   00A1           00572         movwf   0x21
+01C4   3001           00573         movlw   0x01
+01C5   00A2           00574         movwf   0x22
+01C6   3000           00575         movlw   0x00
+01C7   00E0           00576         movwf   0x60
+01C8   30C3           00577         movlw   0xc3    ;place on lcd
+01C9   00E1           00578         movwf   0x61
+                      00579 
+01CA                  00580 x:
+01CA   0BA1           00581         decfsz  0x21,1
+01CB   29CD           00582         goto    y       
+01CC   2A50           00583         goto    print
+01CD                  00584 y:
+01CD   0BA2           00585         decfsz  0x22,1
+01CE   0CC6           00586         rrf             0x46,1  
+01CF   1C46           00587         btfss   0x46,0
+01D0   29CA           00588         goto    x
+01D1   0CC6           00589         rrf             0x46,1
+01D2   03A1           00590         decf    0x21,1
+01D3   1C46           00591         btfss   0x46,0  
+01D4   29CA           00592         goto    x
+01D5   0AE0           00593         incf    0x60,1
+01D6   29CA           00594         goto    x
+                      00595 
+                      00596 
+                      00597 
+01D7                  00598 ones_in_a:
+01D7   3082           00599         movlw   0x82            
+01D8   00E1           00600         movwf   0x61
+01D9   20AC           00601         call    rotate_down
+                      00602 ;******************************O***************************
+01DA   304F           00603         movlw   0x4f                    ; CHAR (the data )
+01DB   00A0           00604         movwf   0x20
+01DC   2297           00605         call    lcdd
+01DD   22B9           00606         call    mdel
+01DE   20AC           00607         call    rotate_down
+                      00608 ;******************************N***************************
+01DF   304E           00609         movlw   0x4e                    ; CHAR (the data )
+01E0   00A0           00610         movwf   0x20
+01E1   2297           00611         call    lcdd
+01E2   22B9           00612         call    mdel
+01E3   20AC           00613         call    rotate_down
+                      00614 ;******************************E***************************
+01E4   3045           00615         movlw   0x45                    ; CHAR (the data )
+01E5   00A0           00616         movwf   0x20
+01E6   2297           00617         call    lcdd
+MPASM  5.51                  LAB1_EX1_G11.ASM   2-27-2022  5:42:02         PAGE 13
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+01E7   22B9           00618         call    mdel
+01E8   20AC           00619         call    rotate_down
+                      00620 ;******************************S***************************
+01E9   3053           00621         movlw   0x53                    ; CHAR (the data )
+01EA   00A0           00622         movwf   0x20
+01EB   2297           00623         call    lcdd
+01EC   22B9           00624         call    mdel
+01ED   20AC           00625         call    rotate_down
+                      00626 ;******************************space***************************
+01EE   20AC           00627         call    rotate_down
+                      00628 ;******************************I***************************
+01EF   3049           00629         movlw   0x49                    ; CHAR (the data )
+01F0   00A0           00630         movwf   0x20
+01F1   2297           00631         call    lcdd
+01F2   22B9           00632         call    mdel
+01F3   20AC           00633         call    rotate_down
+                      00634 ;******************************N***************************
+01F4   304E           00635         movlw   0x4e                    ; CHAR (the data )
+01F5   00A0           00636         movwf   0x20
+01F6   2297           00637         call    lcdd
+01F7   22B9           00638         call    mdel
+01F8   20AC           00639         call    rotate_down
+                      00640 ;******************************space***************************
+01F9   20AC           00641         call    rotate_down
+                      00642 ;******************************A***************************
+01FA   3041           00643         movlw   0x41                    ; CHAR (the data )
+01FB   00A0           00644         movwf   0x20
+01FC   2297           00645         call    lcdd
+01FD   22B9           00646         call    mdel
+01FE   20AC           00647         call    rotate_down
+                      00648 ;******************************:***************************
+01FF   303A           00649         movlw   0x3a                    ; CHAR (the data )
+0200   00A0           00650         movwf   0x20
+0201   2297           00651         call    lcdd
+0202   22B9           00652         call    mdel    
+0203   20AC           00653         call    rotate_down
+                      00654 
+0204   3004           00655         movlw 0x04
+0205   00A1           00656         movwf 0x21
+0206   3000           00657         movlw 0x00
+0207   00E0           00658         movwf 0x60
+                      00659 
+0208                  00660 e:
+0208   1845           00661         btfsc   0x45,0
+0209   0AE0           00662         incf    0x60,1
+020A   0CC5           00663         rrf             0x45,1  
+020B   0BA1           00664         decfsz  0x21,1
+020C   2A08           00665         goto    e
+020D   30C3           00666         movlw   0xc3    ;place on lcd
+020E   00E1           00667         movwf   0x61
+                      00668 ;       movf    0x60,w  
+                      00669 ;       movwf   0x62
+020F   2A50           00670         goto print      
+MPASM  5.51                  LAB1_EX1_G11.ASM   2-27-2022  5:42:02         PAGE 14
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00671 
+0210                  00672 zeros_in_b:     
+Warning[203]: Found opcode in column 1. (movlw)
+0210   3082           00673 movlw   0x82            
+0211   00E1           00674         movwf   0x61
+0212   20AC           00675         call    rotate_down
+                      00676 ;******************************Z***************************
+0213   305A           00677         movlw   0x5a                    ; CHAR (the data )
+0214   00A0           00678         movwf   0x20
+0215   2297           00679         call    lcdd
+0216   22B9           00680         call    mdel
+0217   20AC           00681         call    rotate_down
+                      00682 ;******************************E***************************
+0218   3045           00683         movlw   0x45                    ; CHAR (the data )
+0219   00A0           00684         movwf   0x20
+021A   2297           00685         call    lcdd
+021B   22B9           00686         call    mdel
+021C   20AC           00687         call    rotate_down
+                      00688 ;******************************R***************************
+021D   3052           00689         movlw   0x52                    ; CHAR (the data )
+021E   00A0           00690         movwf   0x20
+021F   2297           00691         call    lcdd
+0220   22B9           00692         call    mdel
+0221   20AC           00693         call    rotate_down
+                      00694 ;******************************O***************************
+0222   304F           00695         movlw   0x4F                    ; CHAR (the data )
+0223   00A0           00696         movwf   0x20
+0224   2297           00697         call    lcdd
+0225   22B9           00698         call    mdel
+0226   20AC           00699         call    rotate_down
+                      00700 ;******************************S***************************
+0227   3053           00701         movlw   0x53                    ; CHAR (the data )
+0228   00A0           00702         movwf   0x20
+0229   2297           00703         call    lcdd
+022A   22B9           00704         call    mdel
+022B   20AC           00705         call    rotate_down
+                      00706 ;******************************space***************************
+022C   20AC           00707         call    rotate_down
+                      00708 ;******************************I***************************
+022D   3049           00709         movlw   0x49                    ; CHAR (the data )
+022E   00A0           00710         movwf   0x20
+022F   2297           00711         call    lcdd
+0230   22B9           00712         call    mdel
+0231   20AC           00713         call    rotate_down
+                      00714 ;******************************N***************************
+0232   304E           00715         movlw   0x4e                    ; CHAR (the data )
+0233   00A0           00716         movwf   0x20
+0234   2297           00717         call    lcdd
+0235   22B9           00718         call    mdel
+0236   20AC           00719         call    rotate_down
+                      00720 ;******************************space***************************
+0237   20AC           00721         call    rotate_down
+                      00722 ;******************************B***************************
+MPASM  5.51                  LAB1_EX1_G11.ASM   2-27-2022  5:42:02         PAGE 15
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0238   3042           00723         movlw   0x42                    ; CHAR (the data )
+0239   00A0           00724         movwf   0x20
+023A   2297           00725         call    lcdd
+023B   22B9           00726         call    mdel
+023C   20AC           00727         call    rotate_down
+                      00728 ;******************************:***************************
+023D   303A           00729         movlw   0x3a                    ; CHAR (the data )
+023E   00A0           00730         movwf   0x20
+023F   2297           00731         call    lcdd
+0240   22B9           00732         call    mdel    
+0241   20AC           00733         call    rotate_down
+                      00734 
+                      00735 
+0242   3004           00736         movlw 0x04
+0243   00A1           00737         movwf 0x21
+0244   3000           00738         movlw 0x00
+0245   00E0           00739         movwf 0x60
+                      00740 
+0246                  00741 q:
+0246   1C46           00742         btfss   0x46,0
+0247   0AE0           00743         incf    0x60,1
+0248   0CC6           00744         rrf             0x46,1  
+0249   0BA1           00745         decfsz  0x21,1
+024A   2A46           00746         goto    q
+024B   30C3           00747         movlw   0xc3    ;place on lcd
+024C   00E1           00748         movwf   0x61
+024D   0860           00749         movf    0x60,w  
+024E   00E2           00750         movwf   0x62
+024F   2A50           00751         goto     print  
+                      00752         
+                      00753         
+                      00754 
+0250                  00755 print:
+0250   20AC           00756         call    rotate_down
+0251   1BE0           00757         btfsc   0x60,7
+0252   225F           00758         call    disp1   
+0253   2258           00759         call    disp0
+0254                  00760 z:
+0254   0DE0           00761         rlf             0x60,1
+0255   0BDF           00762         decfsz  0x5f,1
+0256   2A50           00763         goto    print
+                      00764 ;       goto    start
+0257   2AE0           00765         goto    end_code        
+                      00766 ;**********************************************************
+0258                  00767 disp0:
+                      00768         
+0258   3030           00769                 movlw   0x30                    ; CHAR (the data )
+0259   00A0           00770                 movwf   0x20
+025A   2297           00771                 call    lcdd
+025B   22B9           00772                 call    mdel
+025C   1044           00773                 BCF             0x44,0
+025D   0DC4           00774                 RLF             0x44, 1
+025E   0008           00775                 return
+MPASM  5.51                  LAB1_EX1_G11.ASM   2-27-2022  5:42:02         PAGE 16
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00776 ;**********************************************************
+025F                  00777 disp1:
+                      00778         
+025F   3031           00779                 movlw   0x31                    ; CHAR (the data )
+0260   00A0           00780                 movwf   0x20
+0261   2297           00781                 call    lcdd
+0262   22B9           00782                 call    mdel
+0263   1444           00783                 BSF             0x44,0
+0264   0DC4           00784                 RLF             0x44, 1 
+0265   2A54           00785                 goto    z
+0266   0008           00786                 return
+                      00787 
+                      00788                         
+                      00789 ;**********************************************************
+                      00790         
+                      00791 ;*****************************
+                      00792 ;subroutine to initialize LCD*
+                      00793 ;*****************************
+0267   1283           00794 init:   bcf     STATUS,RP0
+                      00795 
+0268   3030           00796         movlw   0x30
+0269   00A0           00797         movwf   0x20
+026A   2285           00798         call    lcdc
+026B   22A2           00799         call    del_41
+                      00800 
+026C   3030           00801         movlw   0x30
+026D   00A0           00802         movwf   0x20
+026E   2285           00803         call    lcdc
+026F   22AB           00804         call    del_01
+                      00805 
+0270   3030           00806         movlw   0x30
+0271   00A0           00807         movwf   0x20
+0272   2285           00808         call    lcdc
+0273   22B9           00809         call    mdel
+                      00810 
+0274   3001           00811         movlw   0x01            ; display clear
+0275   00A0           00812         movwf   0x20
+0276   2285           00813         call    lcdc
+0277   22B9           00814         call    mdel
+                      00815 
+0278   3006           00816         movlw   0x06            ; I/D=1,S=0 :increment,no  shift 000001 I/D S
+0279   00A0           00817         movwf   0x20
+027A   2285           00818         call    lcdc
+027B   22B9           00819         call    mdel
+                      00820 
+027C   300E           00821         movlw   0x0e            ; D=1,C=B=0 :set display ,no cursor, no blinking
+027D   00A0           00822         movwf   0x20
+027E   2285           00823         call    lcdc
+027F   22B9           00824         call    mdel
+                      00825 
+0280   3038           00826         movlw   0x38            ; dl=1 ( 8 bits interface,n=1:2 lines,f=0:5x7 dots)
+0281   00A0           00827         movwf   0x20
+0282   2285           00828         call    lcdc
+MPASM  5.51                  LAB1_EX1_G11.ASM   2-27-2022  5:42:02         PAGE 17
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0283   22B9           00829         call    mdel
+0284   0008           00830         return
+                      00831 
+                      00832 ;***********************************
+                      00833 ;subroutine to write command to LCD*
+                      00834 ;***********************************
+                      00835 
+0285   1283           00836 lcdc:   bcf             STATUS, RP0        
+0286   3000           00837                 movlw           0x00            ; E=0,RS=0 
+0287   0089           00838                 movwf           PORTE
+0288   0820           00839                 movf            0x20,w
+0289   3E71           00840                 addlw           0x71
+028A   1883           00841                 btfsc           STATUS,0x01
+028B   2A8D           00842                 goto            one
+028C   2A8F           00843                 goto            two
+028D                  00844 one:    
+028D   30C0           00845                 movlw           0xc0
+028E   2A91           00846                 goto            three
+028F                  00847 two:    
+028F   0820           00848                 movf            0x20,w
+0290   0088           00849                 movwf           PORTD
+0291                  00850 three:  
+0291   3001           00851                 movlw           0x01            ; E=1,RS=0
+0292   0089           00852                 movwf           PORTE
+                      00853 
+0293   22B0           00854         call            sdel
+                      00855 
+0294   3000           00856                 movlw           0x00            ; E=0,RS=0
+0295   0089           00857                 movwf           PORTE
+Warning[203]: Found opcode in column 1. (return)
+0296   0008           00858 return
+                      00859 
+                      00860 ;***********************************
+                      00861 ;subroutine to write data to LCD*
+                      00862 ;***********************************
+                      00863 
+0297   1283           00864 lcdd:   bcf             STATUS, RP0        
+0298   3002           00865                 movlw           0x02            ; E=0, RS=1
+0299   0089           00866                 movwf           PORTE
+029A   0820           00867                 movf            0x20,w
+029B   0088           00868                 movwf           PORTD
+029C   3003           00869         movlw           0x03            ; E=1, rs=1  
+029D   0089           00870                 movwf           PORTE
+029E   22B0           00871                 call            sdel
+029F   3002           00872                 movlw           0x02            ; E=0, rs=1  
+02A0   0089           00873                 movwf           PORTE
+Warning[203]: Found opcode in column 1. (return)
+02A1   0008           00874 return
+                      00875 
+02A2   30CD           00876 del_41: movlw           0xcd
+02A3   00A3           00877                 movwf           0x23
+02A4   3020           00878 lulaa6: movlw           0x20
+02A5   00A2           00879                 movwf           0x22
+MPASM  5.51                  LAB1_EX1_G11.ASM   2-27-2022  5:42:02         PAGE 18
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+02A6   0BA2           00880 lulaa7: decfsz          0x22,1
+02A7   2AA6           00881                 goto            lulaa7
+02A8   0BA3           00882                 decfsz          0x23,1
+02A9   2AA4           00883                 goto            lulaa6 
+02AA   0008           00884                 return
+                      00885         
+02AB   3020           00886 del_01: movlw           0x20
+02AC   00A2           00887                 movwf           0x22
+02AD   0BA2           00888 lulaa8: decfsz          0x22,1
+02AE   2AAD           00889                 goto            lulaa8
+02AF   0008           00890                 return
+                      00891 ;************************************************
+02B0   30FF           00892 sdel:   movlw           0xff            ; movlw = 1 cycle
+02B1   00A3           00893                 movwf           0x23            ; movwf = 1 cycle
+02B2   30FA           00894 lulaa2: movlw           0xfa
+02B3   00A2           00895                 movwf           0x22
+02B4   0BA2           00896 lulaa1: decfsz          0x22,1          ; decfsz= 1/2 cycle
+02B5   2AB4           00897                 goto            lulaa1          ; goto  = 2 cycles
+02B6   0BA3           00898                 decfsz          0x23,1
+02B7   2AB2           00899                 goto            lulaa2 
+02B8   0008           00900                 return
+                      00901 ;************************************************
+02B9   300A           00902 mdel:   movlw           0x0a
+02BA   00A4           00903                 movwf           0x24
+02BB   3019           00904 lulaa5: movlw           0x19
+02BC   00A3           00905                 movwf           0x23
+02BD   30FA           00906 lulaa4: movlw           0xfa
+02BE   00A2           00907                 movwf           0x22
+02BF   0BA2           00908 lulaa3: decfsz          0x22,1
+02C0   2ABF           00909                 goto            lulaa3
+02C1   0BA3           00910                 decfsz          0x23,1
+02C2   2ABD           00911                 goto            lulaa4 
+02C3   0BA4           00912                 decfsz          0x24,1
+02C4   2ABB           00913                 goto            lulaa5
+02C5   0008           00914                 return
+                      00915 
+                      00916 ;*******************************************
+02C6                  00917 delay:                                          
+02C6   30FF           00918         movlw           0xFF    
+02C7   00B0           00919         movwf           0x30    ;N1
+02C8                  00920 count3:
+02C8   30FF           00921         movlw           0xFF    ;N2 
+02C9   00B1           00922         movwf           0x31
+02CA                  00923 count2:
+02CA   30FF           00924         movlw           0xFF    ;N3
+02CB   00B2           00925         movwf           0x32
+02CC                  00926 count1:
+Message[305]: Using default destination of 1 (file).
+02CC   0BB2           00927         decfsz          0x32
+02CD   2ACC           00928         GOTO            count1
+Message[305]: Using default destination of 1 (file).
+02CE   0BB1           00929         decfsz          0x31
+02CF   2ACA           00930         GOTO            count2
+MPASM  5.51                  LAB1_EX1_G11.ASM   2-27-2022  5:42:02         PAGE 19
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+Message[305]: Using default destination of 1 (file).
+02D0   0BB0           00931         decfsz          0x30
+02D1   2AC8           00932         GOTO            count3  
+02D2   0008           00933         return
+                      00934 ;*******************************************
+02D3                  00935 delay_2:                                                
+02D3   3096           00936         movlw           0x96    
+02D4   00B0           00937         movwf           0x30    ;N1
+02D5                  00938 count33:
+02D5   3096           00939         movlw           0x96    ;N2 
+02D6   00B1           00940         movwf           0x31
+02D7                  00941 count22:
+02D7   3096           00942         movlw           0x96    ;N3
+02D8   00B2           00943         movwf           0x32
+02D9                  00944 count11:
+Message[305]: Using default destination of 1 (file).
+02D9   0BB2           00945         decfsz          0x32
+02DA   2AD9           00946         GOTO            count11
+Message[305]: Using default destination of 1 (file).
+02DB   0BB1           00947         decfsz          0x31
+02DC   2AD7           00948         GOTO            count22
+Message[305]: Using default destination of 1 (file).
+02DD   0BB0           00949         decfsz          0x30
+02DE   2AD5           00950         GOTO            count33 
+02DF   0008           00951         return
+                      00952 
+                      00953 
+                      00954 
+02E0                  00955 end_code:
+                      00956 
+Warning[205]: Found directive in column 1. (end)
+                      00957 end
+MPASM  5.51                  LAB1_EX1_G11.ASM   2-27-2022  5:42:02         PAGE 20
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+ACKDT                             00000005
+ACKEN                             00000004
+ACKSTAT                           00000006
+ADCON0                            0000001F
+ADCON1                            0000009F
+ADCS0                             00000006
+ADCS1                             00000007
+ADDEN                             00000003
+ADFM                              00000007
+ADIE                              00000006
+ADIF                              00000006
+ADON                              00000000
+ADRESH                            0000001E
+ADRESL                            0000009E
+A_C_E_G                           000000F6
+BCLIE                             00000003
+BCLIF                             00000003
+BF                                00000000
+BRGH                              00000002
+B_D_F                             000000F0
+C                                 00000000
+CCP1CON                           00000017
+CCP1IE                            00000002
+CCP1IF                            00000002
+CCP1M0                            00000000
+CCP1M1                            00000001
+CCP1M2                            00000002
+CCP1M3                            00000003
+CCP1X                             00000005
+CCP1Y                             00000004
+CCP2CON                           0000001D
+CCP2IE                            00000000
+CCP2IF                            00000000
+CCP2M0                            00000000
+CCP2M1                            00000001
+CCP2M2                            00000002
+CCP2M3                            00000003
+CCP2X                             00000005
+CCP2Y                             00000004
+CCPR1                             00000015
+CCPR1H                            00000016
+CCPR1L                            00000015
+CCPR2                             0000001B
+CCPR2H                            0000001C
+CCPR2L                            0000001B
+CHS0                              00000003
+CHS1                              00000004
+CHS2                              00000005
+CKE                               00000006
+CKP                               00000004
+CREN                              00000004
+CSRC                              00000007
+Conversions                       00000126
+MPASM  5.51                  LAB1_EX1_G11.ASM   2-27-2022  5:42:02         PAGE 21
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+D                                 00000005
+DATA_ADDRESS                      00000005
+DC                                00000001
+D_A                               00000005
+D_NOT_A                           00000005
+EEADR                             0000010D
+EEADRH                            0000010F
+EECON1                            0000018C
+EECON2                            0000018D
+EEDATA                            0000010C
+EEDATH                            0000010E
+EEIE                              00000004
+EEIF                              00000004
+EEPGD                             00000007
+F                                 00000001
+FERR                              00000002
+FSR                               00000004
+GCEN                              00000007
+GIE                               00000007
+GO                                00000002
+GO_DONE                           00000002
+GO_NOT_DONE                       00000002
+I2C_DATA                          00000005
+I2C_READ                          00000002
+I2C_START                         00000003
+I2C_STOP                          00000004
+IBF                               00000007
+IBOV                              00000005
+INDF                              00000000
+INTCON                            0000000B
+INTE                              00000004
+INTEDG                            00000006
+INTF                              00000001
+IRP                               00000007
+NOT_A                             00000005
+NOT_ADDRESS                       00000005
+NOT_BO                            00000000
+NOT_BOR                           00000000
+NOT_DONE                          00000002
+NOT_PD                            00000003
+NOT_POR                           00000001
+NOT_RBPU                          00000007
+NOT_RC8                           00000006
+NOT_T1SYNC                        00000002
+NOT_TO                            00000004
+NOT_TX8                           00000006
+NOT_W                             00000002
+NOT_WRITE                         00000002
+OBF                               00000006
+OERR                              00000001
+OPTION_REG                        00000081
+One_situation                     00000141
+P                                 00000004
+MPASM  5.51                  LAB1_EX1_G11.ASM   2-27-2022  5:42:02         PAGE 22
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+PCFG0                             00000000
+PCFG1                             00000001
+PCFG2                             00000002
+PCFG3                             00000003
+PCL                               00000002
+PCLATH                            0000000A
+PCON                              0000008E
+PEIE                              00000006
+PEN                               00000002
+PIE1                              0000008C
+PIE2                              0000008D
+PIR1                              0000000C
+PIR2                              0000000D
+PORTA                             00000005
+PORTB                             00000006
+PORTC                             00000007
+PORTD                             00000008
+PORTE                             00000009
+PR2                               00000092
+PS0                               00000000
+PS1                               00000001
+PS2                               00000002
+PSA                               00000003
+PSPIE                             00000007
+PSPIF                             00000007
+PSPMODE                           00000004
+R                                 00000002
+RA0                               00000000
+RA1                               00000001
+RA2                               00000002
+RA3                               00000003
+RA4                               00000004
+RA5                               00000005
+RB0                               00000000
+RB1                               00000001
+RB2                               00000002
+RB3                               00000003
+RB4                               00000004
+RB5                               00000005
+RB6                               00000006
+RB7                               00000007
+RBIE                              00000003
+RBIF                              00000000
+RC0                               00000000
+RC1                               00000001
+RC2                               00000002
+RC3                               00000003
+RC4                               00000004
+RC5                               00000005
+RC6                               00000006
+RC7                               00000007
+RC8_9                             00000006
+RC9                               00000006
+MPASM  5.51                  LAB1_EX1_G11.ASM   2-27-2022  5:42:02         PAGE 23
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+RCD8                              00000000
+RCEN                              00000003
+RCIE                              00000005
+RCIF                              00000005
+RCREG                             0000001A
+RCSTA                             00000018
+RD                                00000000
+RD0                               00000000
+RD1                               00000001
+RD2                               00000002
+RD3                               00000003
+RD4                               00000004
+RD5                               00000005
+RD6                               00000006
+RD7                               00000007
+RE0                               00000000
+RE1                               00000001
+RE2                               00000002
+READ_WRITE                        00000002
+RP0                               00000005
+RP1                               00000006
+RSEN                              00000001
+RX9                               00000006
+RX9D                              00000000
+R_NOT_W                           00000002
+R_W                               00000002
+S                                 00000003
+SEN                               00000000
+SMP                               00000007
+SPBRG                             00000099
+SPEN                              00000007
+SREN                              00000005
+SSPADD                            00000093
+SSPBUF                            00000013
+SSPCON                            00000014
+SSPCON2                           00000091
+SSPEN                             00000005
+SSPIE                             00000003
+SSPIF                             00000003
+SSPM0                             00000000
+SSPM1                             00000001
+SSPM2                             00000002
+SSPM3                             00000003
+SSPOV                             00000006
+SSPSTAT                           00000094
+STATUS                            00000003
+SYNC                              00000004
+T0CS                              00000005
+T0IE                              00000005
+T0IF                              00000002
+T0SE                              00000004
+T1CKPS0                           00000004
+T1CKPS1                           00000005
+MPASM  5.51                  LAB1_EX1_G11.ASM   2-27-2022  5:42:02         PAGE 24
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+T1CON                             00000010
+T1INSYNC                          00000002
+T1OSCEN                           00000003
+T1SYNC                            00000002
+T2CKPS0                           00000000
+T2CKPS1                           00000001
+T2CON                             00000012
+TMR0                              00000001
+TMR0IE                            00000005
+TMR0IF                            00000002
+TMR1                              0000000E
+TMR1CS                            00000001
+TMR1H                             0000000F
+TMR1IE                            00000000
+TMR1IF                            00000000
+TMR1L                             0000000E
+TMR1ON                            00000000
+TMR2                              00000011
+TMR2IE                            00000001
+TMR2IF                            00000001
+TMR2ON                            00000002
+TOUTPS0                           00000003
+TOUTPS1                           00000004
+TOUTPS2                           00000005
+TOUTPS3                           00000006
+TRISA                             00000085
+TRISA0                            00000000
+TRISA1                            00000001
+TRISA2                            00000002
+TRISA3                            00000003
+TRISA4                            00000004
+TRISA5                            00000005
+TRISB                             00000086
+TRISB0                            00000000
+TRISB1                            00000001
+TRISB2                            00000002
+TRISB3                            00000003
+TRISB4                            00000004
+TRISB5                            00000005
+TRISB6                            00000006
+TRISB7                            00000007
+TRISC                             00000087
+TRISC0                            00000000
+TRISC1                            00000001
+TRISC2                            00000002
+TRISC3                            00000003
+TRISC4                            00000004
+TRISC5                            00000005
+TRISC6                            00000006
+TRISC7                            00000007
+TRISD                             00000088
+TRISD0                            00000000
+TRISD1                            00000001
+MPASM  5.51                  LAB1_EX1_G11.ASM   2-27-2022  5:42:02         PAGE 25
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+TRISD2                            00000002
+TRISD3                            00000003
+TRISD4                            00000004
+TRISD5                            00000005
+TRISD6                            00000006
+TRISD7                            00000007
+TRISE                             00000089
+TRISE0                            00000000
+TRISE1                            00000001
+TRISE2                            00000002
+TRMT                              00000001
+TX8_9                             00000006
+TX9                               00000006
+TX9D                              00000000
+TXD8                              00000000
+TXEN                              00000005
+TXIE                              00000004
+TXIF                              00000004
+TXREG                             00000019
+TXSTA                             00000098
+UA                                00000001
+W                                 00000000
+WCOL                              00000007
+WR                                00000001
+WREN                              00000002
+WRERR                             00000003
+Z                                 00000002
+Zero_situation                    0000013E
+_BODEN_OFF                        00003FBF
+_BODEN_ON                         00003FFF
+_BOREN_OFF                        00003FBF
+_BOREN_ON                         00003FFF
+_CONFIG                           00002007
+_CPD_OFF                          00003FFF
+_CPD_ON                           00003EFF
+_CP_ALL                           00000FCF
+_CP_HALF                          00001FDF
+_CP_OFF                           00003FFF
+_CP_UPPER_256                     00002FEF
+_DEBUG_OFF                        00003FFF
+_DEBUG_ON                         000037FF
+_DEVID1                           00002006
+_FOSC_EXTRC                       00003FFF
+_FOSC_HS                          00003FFE
+_FOSC_LP                          00003FFC
+_FOSC_XT                          00003FFD
+_HS_OSC                           00003FFE
+_IDLOC0                           00002000
+_IDLOC1                           00002001
+_IDLOC2                           00002002
+_IDLOC3                           00002003
+_LP_OSC                           00003FFC
+_LVP_OFF                          00003F7F
+MPASM  5.51                  LAB1_EX1_G11.ASM   2-27-2022  5:42:02         PAGE 26
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+_LVP_ON                           00003FFF
+_PWRTE_OFF                        00003FFF
+_PWRTE_ON                         00003FF7
+_RC_OSC                           00003FFF
+_WDTE_OFF                         00003FFB
+_WDTE_ON                          00003FFF
+_WDT_OFF                          00003FFB
+_WDT_ON                           00003FFF
+_WRT_ENABLE_OFF                   00003DFF
+_WRT_ENABLE_ON                    00003FFF
+_WRT_OFF                          00003DFF
+_WRT_ON                           00003FFF
+_XT_OSC                           00003FFD
+__16F877                          00000001
+__DEBUG                           1
+__MPLAB_DEBUGGER_ICD3             1
+a_double_b                        00000144
+a_minus_b                         0000016B
+a_parts_b                         00000104
+a_power_b                         00000106
+count1                            000002CC
+count11                           000002D9
+count2                            000002CA
+count22                           000002D7
+count3                            000002C8
+count33                           000002D5
+counter                           000000A4
+del_01                            000002AB
+del_41                            000002A2
+delay                             000002C6
+delay_2                           000002D3
+disp0                             00000258
+disp1                             0000025F
+disp_0                            0000007A
+disp_1                            00000081
+disp_a                            00000088
+disp_b                            0000008D
+disp_c                            00000097
+disp_error                        000000B2
+e                                 00000208
+end_code                          000002E0
+init                              00000267
+kb00                              0000005A
+kb01                              0000005C
+kb02                              0000005E
+kb03                              00000060
+kb04                              00000062
+kb05                              00000064
+kb06                              00000066
+kb07                              00000068
+kb08                              0000006A
+kb09                              0000006C
+kb0a                              0000006E
+MPASM  5.51                  LAB1_EX1_G11.ASM   2-27-2022  5:42:02         PAGE 27
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+kb0b                              00000070
+kb0c                              00000072
+kb0d                              00000074
+kb0e                              00000076
+kb0f                              00000078
+lcdc                              00000285
+lcdd                              00000297
+lulaa1                            000002B4
+lulaa2                            000002B2
+lulaa3                            000002BF
+lulaa4                            000002BD
+lulaa5                            000002BB
+lulaa6                            000002A4
+lulaa7                            000002A6
+lulaa8                            000002AD
+mdel                              000002B9
+multiplication                    00000163
+num_A                             000000DC
+num_B                             000000E2
+num_C                             000000E9
+one                               0000028D
+ones_in_a                         000001D7
+ones_pairs_in_b                   00000190
+print                             00000250
+q                                 00000246
+reset                             00000000
+result                            000000FE
+rotate_down                       000000AC
+rotate_right                      000000A4
+sdel                              000002B0
+special                           0000013A
+start                             00000010
+three                             00000291
+two                               0000028F
+wkb                               0000002F
+x                                 000001CA
+y                                 000001CD
+z                                 00000254
+zeros_in_b                        00000210
+
+
+MEMORY USAGE MAP ('X' = Used,  '-' = Unused)
+
+0000 : XX-------------- XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
+0040 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
+0080 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
+MPASM  5.51                  LAB1_EX1_G11.ASM   2-27-2022  5:42:02         PAGE 28
+
+
+MEMORY USAGE MAP ('X' = Used,  '-' = Unused)
+
+
+00C0 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
+0100 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
+0140 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
+0180 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
+01C0 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
+0200 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
+0240 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
+0280 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
+02C0 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX ---------------- ----------------
+
+All other memory blocks unused.
+
+Program Memory Words Used:   722
+Program Memory Words Free:  7470
+
+
+Errors   :     0
+Warnings :     8 reported,     0 suppressed
+Messages :    12 reported,     0 suppressed
+
+
